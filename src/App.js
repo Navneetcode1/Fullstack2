@@ -1,41 +1,29 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 
 const App = () => {
   const [books, setBooks] = useState([]);
   const [form, setForm] = useState({ title: "", author: "", description: "" });
   const [editingBook, setEditingBook] = useState(null);
 
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  const fetchBooks = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/books");
-      setBooks(response.data);
-    } catch (error) {
-      console.error("Error fetching books", error);
-    }
-  };
-
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleAddOrUpdateBook = async () => {
-    try {
-      if (editingBook) {
-        await axios.put(`http://localhost:3000/books/${editingBook.id}`, form);
-      } else {
-        await axios.post("http://localhost:3000/books", form);
-      }
-      fetchBooks();
-      setForm({ title: "", author: "", description: "" });
-      setEditingBook(null);
-    } catch (error) {
-      console.error("Error adding/updating book", error);
+  const handleAddOrUpdateBook = () => {
+    if (editingBook) {
+      // Update existing book
+      setBooks(books.map((book) =>
+        book.id === editingBook.id ? { ...editingBook, ...form } : book
+      ));
+    } else {
+      // Add a new book with a unique ID
+      const newBook = { id: Date.now(), ...form };
+      setBooks([...books, newBook]);
     }
+
+    // Reset form and editing state
+    setForm({ title: "", author: "", description: "" });
+    setEditingBook(null);
   };
 
   const handleEditBook = (book) => {
@@ -43,13 +31,8 @@ const App = () => {
     setEditingBook(book);
   };
 
-  const handleDeleteBook = async (id) => {
-    try {
-      await axios.delete(`http://localhost:3000/books/${id}`);
-      fetchBooks();
-    } catch (error) {
-      console.error("Error deleting book", error);
-    }
+  const handleDeleteBook = (id) => {
+    setBooks(books.filter((book) => book.id !== id));
   };
 
   return (

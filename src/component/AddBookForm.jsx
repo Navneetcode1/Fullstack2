@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 
-const AddBookForm = ({ fetchBooks }) => {
+const AddBookForm = ({ books, setBooks }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await axios.post('http://localhost:5000/books', { title, author, description });
-      fetchBooks(); // Refresh the list of books
-      setTitle('');
-      setAuthor('');
-      setDescription('');
-    } catch (error) {
-      console.error(error);
-    }
+
+    // Create a new book object
+    const newBook = {
+      id: books.length + 1,  // Generate a new ID based on the length of the books array
+      title,
+      author,
+      description,
+    };
+
+    // Add the new book to the existing books list
+    setBooks([...books, newBook]);
+
+    // Clear the input fields
+    setTitle('');
+    setAuthor('');
+    setDescription('');
   };
 
   return (
